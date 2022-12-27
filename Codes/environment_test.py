@@ -2,7 +2,7 @@
 Author: Runze Yuan 1959180242@qq.com
 Date: 2022-12-26 17:23:51
 LastEditors: Runze Yuan 1959180242@qq.com
-LastEditTime: 2022-12-26 17:53:57
+LastEditTime: 2022-12-26 20:20:25
 FilePath: \MV\Codes\environment_test.py
 Description: 
 
@@ -21,7 +21,7 @@ counting_path = MinneApplePath + "\counting"
 detection_path = MinneApplePath + "\detection"
 test_data_path = MinneApplePath + (r"\test_data")
 
-print(prev_path)
-img = cv2.imread(test_data_path+(r"\counting\images\testset1_5cluster_12.jpg"))
+#img = cv2.imread(test_data_path+(r"\counting\images\testset1_5cluster_12.png"))
+img = cv2.imread(detection_path+(r"\test\images\dataset1_back_1.png"))
 cv2.imshow("test",img)
 cv2.waitKey(0)
