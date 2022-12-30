@@ -2,7 +2,7 @@
 Author: Runze Yuan 1959180242@qq.com
 Date: 2022-12-27 09:43:29
 LastEditors: Runze Yuan 1959180242@qq.com
-LastEditTime: 2022-12-28 17:35:25
+LastEditTime: 2022-12-30 11:52:37
 FilePath: \MV\Codes\12_27.py
 Description: 
 
@@ -19,20 +19,20 @@ green_path_2 = r"A:\OneDrive\MScRobotics\MV\MV\MinneApple\detection\train\images
 # 思路： https://blog.csdn.net/weixin_39444552/article/details/88783222
 # 调节对小果子的灵敏度以及对小色块的容忍度：113行的length阈值和97行的开运算核大小
 
-show_process = False # 是否展示运算过程
+show_process = True # 是否展示运算过程
 
 import cv2
 import numpy as np
 
 red_BGR = cv2.imread(red_path)
-green_BGR = cv2.imread(green_path_1)
+green_BGR = cv2.imread(green_path_2)
 cv2.imshow("original:",green_BGR)
 cv2.waitKey(0)
 red_YCC = cv2.cvtColor(red_BGR,cv2.COLOR_BGR2YCR_CB) # 红色CR通道好
 green_YCC = cv2.cvtColor(green_BGR,cv2.COLOR_BGR2YCR_CB) # 绿色CB通道好
 """
 1. 根据色块寻找果子
-产生： threshed： 用指定通道的自适应阈值划取的二值图像
+产生： threshed： 用指定通道的自适应阈值划取的二值图像 有果子的地方白
 """
 
 # 绿苹果的CB通道
@@ -45,10 +45,9 @@ min = np.amin(green_YCC_channel2)
 max = np.amax(green_YCC_channel2)
 
 range = max-min
-thres = min+range*0.47
+thres = min+range*0.48
 
-ret,threshed = cv2.threshold(green_YCC_channel2, thres,np.amax(green_YCC_channel2), cv2.THRESH_BINARY_INV)
-ret,threshed = cv2.threshold(threshed,0,255,cv2.THRESH_OTSU) # 上一步得到的亮部不是255，不知道是什么原因
+_,threshed = cv2.threshold(green_YCC_channel2,thres,255,cv2.THRESH_BINARY_INV)
 
 # 开一下，去掉杂的绿叶部分
 kernel = np.ones((8,8),dtype = np.uint8)
@@ -57,6 +56,7 @@ threshed = cv2.morphologyEx(threshed,cv2.MORPH_OPEN,kernel)
 
 
 if show_process:
+    cv2.imshow("Cb channel",green_YCC_channel2)
     cv2.imshow("1. thresed",threshed)
     print("max:"+str(max))
     print("min:"+str(min))
@@ -86,11 +86,11 @@ masked_gray = cv2.cvtColor(masked,cv2.COLOR_BGR2GRAY)
 masked_gray = cv2.medianBlur(masked_gray,5) # 中值滤波波，去除canny中的噪声
 canny = cv2.Canny(masked_gray,100,200,L2gradient=True) # 黑底白边的边缘图
 
-divided = cv2.bitwise_and(masked, cv2.cvtColor(canny,cv2.COLOR_GRAY2BGR))
-divided = masked-divided
+devided = cv2.bitwise_and(masked, cv2.cvtColor(canny,cv2.COLOR_GRAY2BGR))
+devided = masked-devided
 
 if show_process:
-    cv2.imshow("3. divided",divided)
+    cv2.imshow("3. divided",devided)
     cv2.waitKey(0)
 
 """
@@ -98,7 +98,7 @@ if show_process:
 产生： filled 用此图进入色块计数，直接获得答案。这个就相当于最终解了
 """
 # 过侵蚀
-eroded = cv2.erode(divided,np.ones((2,2),dtype = np.uint8))
+eroded = cv2.erode(devided,np.ones((2,2),dtype = np.uint8))
 
 # 开运算
 opened = cv2.morphologyEx(eroded,cv2.MORPH_OPEN,np.ones((3,3),dtype = np.uint8),1) # 这一个大核的尺寸滤掉了大多数小不点色块
@@ -110,7 +110,7 @@ opened_gray = cv2.cvtColor(opened,cv2.COLOR_BGR2GRAY)
 contours, hierarchy = cv2.findContours(opened_gray,2,1)
 
 
-filled = opened_gray.copy()
+filled = opened_gray#.copy()
 filled.fill(0)
 
     # 填充凸包轮廓
@@ -127,6 +127,8 @@ for cnt in contours:
             cv2.line(filled, tuple(hull[i][0]), tuple(hull[(i+1)%length][0]), (0,0,0), 1)
             i+=1
 
+filled_prev = filled
+
 # 闭运算 消除光圈的黑圈
 filled = cv2.morphologyEx(filled,cv2.MORPH_CLOSE,np.ones((2,2),dtype = np.uint8),2)
 # 侵蚀 消除多边形填充产生的小枝条
@@ -137,7 +139,7 @@ if show_process:
     cv2.waitKey(0)
     cv2.imshow("4-2 opened",opened)
     cv2.waitKey(0)
-    cv2.imshow("4-3 hull filled",filled)
+    cv2.imshow("4-3 hull filled",filled_prev)
     cv2.waitKey(0)
     cv2.imshow("step 4 result (4-4) morphology processed",filled)
     cv2.waitKey(0)
