@@ -2,8 +2,8 @@
 Author: Runze Yuan 1959180242@qq.com
 Date: 2022-12-28 17:38:15
 LastEditors: Runze Yuan 1959180242@qq.com
-LastEditTime: 2022-12-30 17:04:21
-FilePath: \MV\Codes\Classical_process.py
+LastEditTime: 2023-01-02 09:46:43
+FilePath: \MV\Codes\ClassicalProcess.py
 Description: 旨在将12.27.py中的处理算法做成一个函数
 
 Copyright (c) 2022 by Runze Yuan 1959180242@qq.com, All Rights Reserved. 
@@ -375,7 +375,7 @@ def ClassicalMarking(src):
         count = green_result[0]
         center = green_result[3]
     if red_flag and green_flag: # 如果两种都有： 结合结果
-        count = green_result[0]+redresult[0]
+        count = green_result[0]+red_result[0]
         center = np.concatenate((red_result[3],green_result[3]),axis=0)
 
     """
@@ -395,7 +395,7 @@ def ClassicalMarking(src):
 if __name__ == "__main__":
     # red: 
     red_path_1 = r"A:\OneDrive\MScRobotics\MV\MV\MinneApple\detection\test\images\dataset1_front_241.png"
-    red_path_2= r"A:\OneDrive\MScRobotics\MV\MV\MinneApple\detection\test\images\dataset1_front_901.png"
+    red_path_2 = r"A:\OneDrive\MScRobotics\MV\MV\MinneApple\detection\test\images\dataset1_front_901.png"
 
     # green: 
     green_path_1 = r"A:\OneDrive\MScRobotics\MV\MV\MinneApple\detection\train\images\20150919_174151_image11.png"
@@ -407,10 +407,10 @@ if __name__ == "__main__":
     green1 = cv2.imread(green_path_1)
     green2 = cv2.imread(green_path_2)
 
-    ClassicalMarking(red1)
+    #ClassicalMarking(red1)
     #ClassicalMarking(red2)
     #ClassicalMarking(green1)
-    #ClassicalMarking(green2)
+    ClassicalMarking(green2)
 
 
         
