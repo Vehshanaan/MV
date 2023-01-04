@@ -2,8 +2,8 @@
 Author: Runze Yuan 1959180242@qq.com
 Date: 2022-12-28 17:38:15
 LastEditors: Runze Yuan 1959180242@qq.com
-LastEditTime: 2023-01-04 18:52:49
-FilePath: \MV\Codes\ClassicalProcess.py
+LastEditTime: 2023-01-04 18:53:06
+FilePath: \MV\Codes\ReportExampleGenerate.py
 Description: 旨在将12.27.py中的处理算法做成一个函数
 
 Copyright (c) 2022 by Runze Yuan 1959180242@qq.com, All Rights Reserved. 
@@ -38,8 +38,8 @@ def RedMarking(src):
     hsv_range = hsv_max-hsv_min
 
     # 计算自适应阈值
-    thres_max_hsv = hsv_max-hsv_range*0.5
-    thres_min_hsv = hsv_min+hsv_range*0.5
+    thres_max_hsv = hsv_max-hsv_range*0.1
+    thres_min_hsv = hsv_min+hsv_range*0.1
 
     # 用两个自适应阈值二值化    
     _,threshed_max_hsv = cv2.threshold(red_h,thres_max_hsv,255,cv2.THRESH_BINARY)
@@ -47,6 +47,7 @@ def RedMarking(src):
 
     # 结合两个自适应阈值的结果
     threshed_red_hsv = cv2.bitwise_or(threshed_max_hsv,threshed_min_hsv)
+
 
     # (2).再来RGB :计算红色通道在三通道值中的占比，再判断剩下的像素中红的值够不够高
     # （2）-1 判断红色占比够不够高
@@ -65,10 +66,11 @@ def RedMarking(src):
     r_max = np.amax(r)
     r_min = np.amin(r)
     r_range = r_max-r_min
-    thres_r = r_max-r_range*0.35
+    thres_r = r_max-r_range*0.5
 
     # 二值化
     _,threshed_r = cv2.threshold(r,thres_r,255,cv2.THRESH_BINARY)
+
 
     # （2）-2 判断红色通道的值够不够高
     b,g,r = cv2.split(src)
@@ -77,6 +79,7 @@ def RedMarking(src):
 
     threshed = cv2.bitwise_and(threshed_red_hsv,threshed_r)
     threshed = cv2.bitwise_and(threshed,threshed_abs_r)
+
 
     threshed = cv2.medianBlur(threshed,5)
     #threshed = cv2.morphologyEx(threshed,cv2.MORPH_ERODE,np.ones((2,2),dtype = np.uint8),1)
@@ -144,7 +147,7 @@ def RedMarking(src):
         hull = cv2.convexHull(cnt)
         length = len(hull)
         # 如果凸包点集中的像素大于8:
-        if(length>8): # 调大这个可以过滤图中的小色块
+        if(length>0): # 调大这个可以过滤图中的小色块
             # 填充凸包
             cv2.fillConvexPoly(filled,cnt,(255,255,255))
             # 重绘凸包边界，防止凸包之间粘连
@@ -216,7 +219,6 @@ def GreenMarking(src):
     green_YCC_channel2 = green_YCC[:,:,2]
     # 高斯模糊
     green_YCC_channel2 = cv2.blur(green_YCC_channel2,(3,3))
-
     # 二值化 找最黑的值，然后最黑值+10%*整体范围，作为阈值
     min = np.amin(green_YCC_channel2)
     max = np.amax(green_YCC_channel2)
@@ -245,10 +247,12 @@ def GreenMarking(src):
     """
     masked_gray = cv2.cvtColor(masked,cv2.COLOR_BGR2GRAY)
     masked_gray = cv2.medianBlur(masked_gray,5) # 中值滤波波，去除canny中的噪声
+
     canny = cv2.Canny(masked_gray,100,200,L2gradient=True) # 黑底白边的边缘图
 
     devided = cv2.bitwise_and(masked, cv2.cvtColor(canny,cv2.COLOR_GRAY2BGR))
     devided = masked-devided
+
 
     """
     4.腐蚀上图，得到不重叠的果子计数
@@ -285,7 +289,8 @@ def GreenMarking(src):
     # 闭运算 消除光圈的黑圈
     filled = cv2.morphologyEx(filled,cv2.MORPH_CLOSE,np.ones((2,2),dtype = np.uint8),2)
     # 侵蚀 消除多边形填充产生的小枝条
-    filled = cv2.erode(filled,np.ones((2,2),dtype = np.uint8))  
+    filled = cv2.erode(filled,np.ones((2,2),dtype = np.uint8))
+
 
     """
     5.数果子
@@ -382,8 +387,9 @@ def ClassicalMarking(src):
     """
     for cen in center:
         cen = (int(cen[0]),int(cen[1]))
-        img = cv2.circle(src,cen,1,(255,0,0),8)
-    cv2.putText(img,str(count),(50,100),cv2.FONT_HERSHEY_DUPLEX,2,(255,255,0),2)
+        img = cv2.circle(src,cen,1,(0,0,255),8)
+    #cv2.putText(img,str(count),(50,100),cv2.FONT_HERSHEY_DUPLEX,2,(0,0,255),2)
+    cv2.putText(img,"Count:{}".format(count),(50,100),cv2.FONT_HERSHEY_DUPLEX,2,(255,0,0),8)
     cv2.imshow("result",img)
     cv2.waitKey(0)
 
@@ -395,7 +401,7 @@ if __name__ == "__main__":
     # red: 
     red_path_1 = r"A:\OneDrive\MScRobotics\MV\MV\MinneApple\detection\test\images\dataset1_front_241.png"
     red_path_2 = r"A:\OneDrive\MScRobotics\MV\MV\MinneApple\detection\test\images\dataset1_front_901.png"
-
+    red_path_3 = r"A:\OneDrive\MScRobotics\MV\MV\MinneApple\detection\test\images\dataset1_back_1.png"
     # green: 
     green_path_1 = r"A:\OneDrive\MScRobotics\MV\MV\MinneApple\detection\train\images\20150919_174151_image11.png"
     green_path_2 = r"A:\OneDrive\MScRobotics\MV\MV\MinneApple\detection\train\images\20150919_174151_image856.png"
@@ -403,11 +409,14 @@ if __name__ == "__main__":
 
     red1 = cv2.imread(red_path_1)
     red2 = cv2.imread(red_path_2)
+    red3 = cv2.imread(red_path_3)
     green1 = cv2.imread(green_path_1)
     green2 = cv2.imread(green_path_2)
 
+
     #ClassicalMarking(red1)
     #ClassicalMarking(red2)
+    ClassicalMarking(red3)
     #ClassicalMarking(green1)
     #ClassicalMarking(green2)
 
