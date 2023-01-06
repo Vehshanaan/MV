@@ -2,7 +2,7 @@
 Author: Runze Yuan 1959180242@qq.com
 Date: 2022-12-28 17:38:15
 LastEditors: Runze Yuan 1959180242@qq.com
-LastEditTime: 2023-01-04 18:53:06
+LastEditTime: 2023-01-05 19:06:08
 FilePath: \MV\Codes\ReportExampleGenerate.py
 Description: 旨在将12.27.py中的处理算法做成一个函数
 
@@ -387,7 +387,7 @@ def ClassicalMarking(src):
     """
     for cen in center:
         cen = (int(cen[0]),int(cen[1]))
-        img = cv2.circle(src,cen,1,(0,0,255),8)
+        img = cv2.circle(src,cen,1,(0,255,0),2)
     #cv2.putText(img,str(count),(50,100),cv2.FONT_HERSHEY_DUPLEX,2,(0,0,255),2)
     cv2.putText(img,"Count:{}".format(count),(50,100),cv2.FONT_HERSHEY_DUPLEX,2,(255,0,0),8)
     cv2.imshow("result",img)
@@ -414,9 +414,9 @@ if __name__ == "__main__":
     green2 = cv2.imread(green_path_2)
 
 
-    #ClassicalMarking(red1)
+    ClassicalMarking(red1)
     #ClassicalMarking(red2)
-    ClassicalMarking(red3)
+    #ClassicalMarking(red3)
     #ClassicalMarking(green1)
     #ClassicalMarking(green2)
 
