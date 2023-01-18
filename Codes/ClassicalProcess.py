@@ -2,7 +2,7 @@
 Author: Runze Yuan 1959180242@qq.com
 Date: 2022-12-28 17:38:15
 LastEditors: Runze Yuan 1959180242@qq.com
-LastEditTime: 2023-01-04 18:52:49
+LastEditTime: 2023-01-09 15:50:43
 FilePath: \MV\Codes\ClassicalProcess.py
 Description: 旨在将12.27.py中的处理算法做成一个函数
 
@@ -65,7 +65,7 @@ def RedMarking(src):
     r_max = np.amax(r)
     r_min = np.amin(r)
     r_range = r_max-r_min
-    thres_r = r_max-r_range*0.35
+    thres_r = r_max-r_range*0.5
 
     # 二值化
     _,threshed_r = cv2.threshold(r,thres_r,255,cv2.THRESH_BINARY)
